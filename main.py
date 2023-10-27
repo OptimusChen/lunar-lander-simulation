@@ -6,10 +6,11 @@ import random
 
 FPS = 60
 SCREEN_SIZE = 1000
+PARTICLE_COUNT = 4
 
 GOLD = (255, 215, 0)
 
-thrust = 12000
+thrust = 25000
 leg_height = 30
 
 dt = 1 / FPS
@@ -17,6 +18,7 @@ dt = 1 / FPS
 particles = []
 
 colors = [(255, 150, 0), (255, 255, 0), (255, 0, 0)]
+# colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 255)]
 
 class Particle:
     def __init__(self, x, y):
@@ -35,7 +37,7 @@ class Particle:
         if (self.y > SCREEN_SIZE - 70):
             particles.remove(self)
         
-        pygame.draw.rect(screen, colors[random.randint(0, 2)], pygame.Rect(self.x, self.y, 5, 5))
+        pygame.draw.rect(screen, colors[random.randint(0, len(colors) - 1)], pygame.Rect(self.x, self.y, 5, 5))
 
 class Lander:
     def __init__(self):
@@ -45,8 +47,8 @@ class Lander:
         self.top_verticies = [35, -70]
         self.top_velocity = [0, 0]
                 
-        self.weight = 4570
-        self.fuel = 10075 - self.weight
+        self.mass = 4570
+        self.fuel = 10075 - self.mass
 
         scale = 30
 
@@ -60,6 +62,8 @@ class Lander:
         ]
         
     def update_velocity(self):
+        self.fuel = max(self.fuel, 0)
+        
         velocity = np.array(self.velocity)
         verticies = np.array(self.verticies)
         
@@ -85,17 +89,20 @@ class Lander:
         return self.verticies[1] == SCREEN_SIZE - 70
       
     def thrust(self):
-        velocity = (thrust / self.get_weight()) * dt
+        if (self.fuel <= 0):
+            return
+        
+        velocity = (thrust / self.get_mass()) * dt
                 
         self.velocity[1] += velocity
         
-        for i in range(5):
+        for i in range(PARTICLE_COUNT):
             Particle(self.verticies[0], self.verticies[1] - leg_height)
         
-        self.fuel -= 100
+        self.fuel -= 10
       
-    def get_weight(self):
-        return self.weight + max(self.fuel, 0)
+    def get_mass(self):
+        return self.mass + max(self.fuel, 0)
     
     def get_octogon_coords(self):
         coords = []
@@ -107,6 +114,9 @@ class Lander:
     
     def get_mph(self):
         return abs(self.velocity[1] * 2.23694)
+    
+    def get_mph_string(self):
+        return f'{self.get_mph():.2f}'
     
     def launch(self):
         self.top_velocity[1] += 30
@@ -128,6 +138,8 @@ run = True
 clock = pygame.time.Clock()
 lander = Lander()
 
+font = pygame.font.Font('freesansbold.ttf', 32)
+
 while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -147,6 +159,16 @@ while run:
     
     lander.update_velocity()
     
+    fuel_display = font.render("Fuel: " + str(lander.fuel), True, (255, 255, 255))
+    screen.blit(fuel_display, fuel_display.get_rect())
+    
+    speed_display = font.render('MPH: ' + lander.get_mph_string(), True, (255, 255, 255))
+    
+    speed_display_rect = speed_display.get_rect()
+    speed_display_rect.centery += 30
+    
+    screen.blit(speed_display, speed_display_rect)
+
     for particle in particles:
         particle.update()
         
