@@ -14,8 +14,15 @@ GOLD = (255, 215, 0)
 thrust = 25000
 
 max_speed = 5
+fuel = 5505
 
 dt = 1 / FPS
+
+level = 1
+
+# fuel, mph
+levels = [(5505, 5), (4500, 5), (4000, 4.5), (3500, 4), (2000, 4), (1500, 3.5), (1000, 3.5), 
+          (1000, 3), (1000, 2.5), (1000, 2), (1000, 1)]
 
 particles = []
 
@@ -51,7 +58,7 @@ class Lander:
                 
         # unit: kg
         self.mass = 4570
-        self.fuel = 10075 - self.mass
+        self.fuel = fuel
         
         self.leg_height = 30
         
@@ -194,6 +201,15 @@ while run:
                 lander.launch()
             if (event.key == pygame.K_r):
                 lander = Lander()
+            if (event.key == pygame.K_l):
+                level += 1
+                
+                level_values = levels[level + 1]
+    
+                fuel = level_values[0]
+                max_speed = level_values[1]
+                
+                lander = Lander()
                 
     screen.fill((0, 0, 0))
     
@@ -204,13 +220,19 @@ while run:
     
     lander.update_velocity()
     
-    draw_text("Fuel: " + str(lander.fuel), (255, 255, 255))
-    draw_text('MPH: ' + lander.get_mph_string(), (255, 0, 0) if lander.get_mph() > max_speed or lander.crashed else (0, 255, 0), offset=(0, -30))
+    draw_text('Level: ' + str(level), (255, 255, 255))
+    draw_text("Fuel: " + str(lander.fuel), (255, 255, 255), offset=(0, -30))
+    draw_text('MPH: ' + lander.get_mph_string(), (255, 0, 0) if lander.get_mph() > max_speed or lander.crashed else (0, 255, 0), offset=(0, -60))
     
     if (lander.success):
         draw_text('SUCCESS!!1!!111', (0, 255, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2, 30, 30, True)
-        draw_text('R to restart', (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 60, 30, 30, True)
-    
+        
+        next = levels[level]
+        
+        draw_text('L for next level:', (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 60, 30, 30, True)
+        draw_text('Fuel: ' + str(next[0]), (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 100, 30, 30, True)
+        draw_text('Max MPH: ' + str(next[1]), (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 140, 30, 30, True)
+
     if (lander.crashed):
         draw_text('FAIL!!1!!111', (255, 0, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2, 30, 30, True)
         draw_text('R to restart', (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 60, 30, 30, True)
