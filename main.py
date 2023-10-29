@@ -13,6 +13,9 @@ GOLD = (255, 215, 0)
 # unit: N
 thrust = 25000
 
+# gravitational constant m/s^2
+g = 1.62e1
+
 max_speed = 5
 fuel = 5505
 
@@ -83,7 +86,7 @@ class Lander:
         velocity = np.array(self.velocity)
         verticies = np.array(self.verticies)
         
-        velocity[1] -= 1.62 / FPS
+        velocity[1] -= g / FPS
         
         if self.get_floor():
             if not self.floor:
@@ -199,12 +202,12 @@ while run:
                 run = False
             if event.key == pygame.K_SPACE:
                 lander.launch()
-            if (event.key == pygame.K_r):
+            if (event.key == pygame.K_r and lander.crashed):
                 lander = Lander()
             if (event.key == pygame.K_l and lander.success):
                 level += 1
                 
-                level_values = levels[level + 1]
+                level_values = levels[level]
     
                 fuel = level_values[0]
                 max_speed = level_values[1]
