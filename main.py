@@ -14,7 +14,7 @@ GOLD = (255, 215, 0)
 thrust = 25000
 
 # gravitational constant m/s^2
-g = 1.62e1
+g = 1.62
 
 max_speed = 5
 fuel = 5505
