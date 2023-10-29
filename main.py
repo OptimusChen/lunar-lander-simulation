@@ -227,11 +227,14 @@ while run:
     if (lander.success):
         draw_text('SUCCESS!!1!!111', (0, 255, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2, 30, 30, True)
         
-        next = levels[level]
-        
-        draw_text('L for next level:', (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 60, 30, 30, True)
-        draw_text('Fuel: ' + str(next[0]), (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 100, 30, 30, True)
-        draw_text('Max MPH: ' + str(next[1]), (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 140, 30, 30, True)
+        if level > len(levels):
+            draw_text('2 ez u won', (0, 255, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 60, 30, 30, True)
+        else:
+            next = levels[level]
+            
+            draw_text('L for next level:', (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 60, 30, 30, True)
+            draw_text('Fuel: ' + str(next[0]), (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 100, 30, 30, True)
+            draw_text('Max MPH: ' + str(next[1]), (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 140, 30, 30, True)
 
     if (lander.crashed):
         draw_text('FAIL!!1!!111', (255, 0, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2, 30, 30, True)
