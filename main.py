@@ -201,7 +201,7 @@ while run:
                 lander.launch()
             if (event.key == pygame.K_r):
                 lander = Lander()
-            if (event.key == pygame.K_l):
+            if (event.key == pygame.K_l and lander.success):
                 level += 1
                 
                 level_values = levels[level + 1]
@@ -227,7 +227,7 @@ while run:
     if (lander.success):
         draw_text('SUCCESS!!1!!111', (0, 255, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2, 30, 30, True)
         
-        if level > len(levels):
+        if level == len(levels):
             draw_text('2 ez u won', (0, 255, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 60, 30, 30, True)
         else:
             next = levels[level]
