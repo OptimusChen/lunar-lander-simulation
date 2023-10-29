@@ -256,8 +256,8 @@ while run:
     draw_text('MPH: ' + lander.get_mph_string(), (255, 0, 0) if lander.get_mph() > max_speed or lander.crashed else (0, 255, 0), offset=(0, -60))
     
     draw_text("Constants", (255, 255, 255), offset=(-SCREEN_SIZE / 1.21, 0))
-    draw_text("Thrust: " + str(thrust) + " N", (255, 255, 255), offset=(-SCREEN_SIZE / 1.29, -30))
-    draw_text("Burn: 600 kg/s", (255, 255, 255), offset=(-SCREEN_SIZE / 1.3, -60))
+    draw_text("Burn: 600 kg/s", (255, 255, 255), offset=(-SCREEN_SIZE / 1.3, -30))
+    draw_text("Thrust: " + str(thrust) + " N", (255, 255, 255), offset=(-SCREEN_SIZE / 1.35, -60))
 
     if (lander.success):
         draw_text('SUCCESS!!1!!111', (0, 255, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2, 30, 30, True)
