@@ -123,7 +123,7 @@ class Lander:
         self.velocity[1] += velocity
         
         for i in range(PARTICLE_COUNT):
-            Particle(self.verticies[0], self.verticies[1] - self.leg_height)
+            Particle(self.verticies[0], self.get_body_y())
         
         self.fuel -= 10
       
@@ -157,17 +157,45 @@ class Lander:
             print("passed")
             
             self.success = True
+            
+    def get_body_y(self):
+        return self.verticies[1] - self.leg_height
+    
+    def draw_american_flag(self, flag_position):
+        # stripes
+        pygame.draw.line(screen, (255, 0, 0), (self.verticies[0] + flag_position, self.get_body_y() - 24), (self.verticies[0] + 20 + flag_position, self.get_body_y() - 24), 1)
+
+        for i in range(6):
+            offset = (i - 1) * 2
+            
+            pygame.draw.line(screen, (255, 255, 255), (self.verticies[0] + flag_position, self.get_body_y() - 15 - offset), (self.verticies[0] + 20 + flag_position, self.get_body_y() - 15 - offset), 1)
+            pygame.draw.line(screen, (255, 0, 0), (self.verticies[0] + flag_position, self.get_body_y() - 14 - offset), (self.verticies[0] + 20 + flag_position, self.get_body_y() - 14 - offset), 1)
+                  
+        pygame.draw.rect(screen, (0, 0, 255), pygame.Rect(self.verticies[0] + flag_position, self.get_body_y() - 24, 8, 5))
+        
+        # stars
+        for i in range(3):
+            for j in range(3):
+                xpos = self.verticies[0] + 1 + j * 2 + flag_position
+                
+                if (i % 2 != 0):
+                    xpos = self.verticies[0] + 2 + j * 2 + flag_position
+                
+                pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(xpos, self.get_body_y() - 22 - (i - 1), 1, 1))
     
     def draw(self):
-        pygame.draw.rect(screen, GOLD, pygame.Rect(self.verticies[0] - 50, self.verticies[1] - 30 - self.leg_height, 100, 30))
+        pygame.draw.rect(screen, GOLD, pygame.Rect(self.verticies[0] - 50, self.get_body_y() - 30, 100, 30))
                 
         # legs
-        pygame.draw.line(screen, GOLD, (self.verticies[0], self.verticies[1] - self.leg_height), (self.verticies[0], self.verticies[1]), 4)
-        pygame.draw.line(screen, GOLD, (self.verticies[0] - 20, self.verticies[1] - self.leg_height), (self.verticies[0] - 40, self.verticies[1]), 4)
-        pygame.draw.line(screen, GOLD, (self.verticies[0] + 20, self.verticies[1] - self.leg_height), (self.verticies[0] + 40, self.verticies[1]), 4)
+        pygame.draw.line(screen, GOLD, (self.verticies[0], self.get_body_y()), (self.verticies[0], self.verticies[1]), 4)
+        pygame.draw.line(screen, GOLD, (self.verticies[0] - 20, self.get_body_y()), (self.verticies[0] - 40, self.verticies[1]), 4)
+        pygame.draw.line(screen, GOLD, (self.verticies[0] + 20, self.get_body_y()), (self.verticies[0] + 40, self.verticies[1]), 4)
                 
         pygame.draw.polygon(screen, (200, 200, 200), self.get_octogon_coords())
-    
+
+        # USA USA USA
+        self.draw_american_flag(-40)
+                    
 def draw_text(text, color, x = -1, y = -1, width = -1, height = -1, edit_dimensions = False, offset = (0, 0)):
     text_display = font.render(text, True, color)
 
@@ -207,7 +235,7 @@ while run:
             if (event.key == pygame.K_l and lander.success):
                 level += 1
                 
-                level_values = levels[level]
+                level_values = levels[level - 1]
     
                 fuel = level_values[0]
                 max_speed = level_values[1]
@@ -227,11 +255,15 @@ while run:
     draw_text("Fuel: " + str(lander.fuel), (255, 255, 255), offset=(0, -30))
     draw_text('MPH: ' + lander.get_mph_string(), (255, 0, 0) if lander.get_mph() > max_speed or lander.crashed else (0, 255, 0), offset=(0, -60))
     
+    draw_text("Constants", (255, 255, 255), offset=(-SCREEN_SIZE / 1.21, 0))
+    draw_text("Thrust: " + str(thrust) + " N", (255, 255, 255), offset=(-SCREEN_SIZE / 1.29, -30))
+    draw_text("Burn: 600 kg/s", (255, 255, 255), offset=(-SCREEN_SIZE / 1.3, -60))
+
     if (lander.success):
         draw_text('SUCCESS!!1!!111', (0, 255, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2, 30, 30, True)
         
         if level == len(levels):
-            draw_text('2 ez u won', (0, 255, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 60, 30, 30, True)
+            draw_text('you win!!11!11', (0, 255, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 60, 30, 30, True)
         else:
             next = levels[level]
             
