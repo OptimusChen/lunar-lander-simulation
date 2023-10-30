@@ -16,13 +16,16 @@ thrust = 25000
 # gravitational constant m/s^2
 g = 1.62
 
-# mph
-max_speed = 2
-
-# kg
-fuel = 5505 
+max_speed = 5
+fuel = 5505
 
 dt = 1 / FPS
+
+level = 1
+
+# fuel, mph
+levels = [(5505, 5), (4500, 5), (4000, 4.5), (3500, 4), (2000, 4), (1500, 3.5), (1000, 3.5), 
+          (1000, 3), (1000, 2.5), (1000, 2), (1000, 1)]
 
 particles = []
 
@@ -108,6 +111,9 @@ class Lander:
         
         self.draw()
       
+    def get_floor(self):
+        return self.verticies[1] == SCREEN_SIZE - 70
+      
     def thrust(self):
         if self.fuel <= 0 or self.crashed or self.success:
             return
@@ -120,26 +126,40 @@ class Lander:
             Particle(self.verticies[0], self.get_body_y())
         
         self.fuel -= 10
+      
+    def get_mass(self):
+        return self.mass + max(self.fuel, 0)
     
-    def ascent(self):
-        if self.fuel <= 0:
-            return
+    def get_octogon_coords(self):
+        coords = []
         
-        velocity = (thrust / self.get_mass()) * dt
-                
-        self.top_velocity[1] += velocity
+        for coord in self.octogon:
+            coords.append((self.verticies[0] - 50 + self.top_verticies[0] + coord[0], self.verticies[1] - 20 - self.leg_height + self.top_verticies[1] + coord[1]))
         
-        for i in range(PARTICLE_COUNT):
-            Particle(self.verticies[0], self.verticies[1] + 5 + self.top_verticies[1])
-        
-        self.fuel -= 10
+        return coords
+    
+    def get_mph(self):
+        return abs(self.velocity[1] * 2.23694)
+    
+    def get_mph_string(self):
+        return f'{self.get_mph():.2f}'
+    
+    def launch(self):
+        self.top_velocity[1] += 30
         
     def impact(self):        
         if self.get_mph() > max_speed:
+            print("failed")
+            
             self.crashed = True
             self.leg_height = 0
-        else:            
+        else:
+            print("passed")
+            
             self.success = True
+            
+    def get_body_y(self):
+        return self.verticies[1] - self.leg_height
     
     def draw_american_flag(self, flag_position):
         # stripes
@@ -175,29 +195,6 @@ class Lander:
 
         # USA USA USA
         self.draw_american_flag(-40)
-        
-    def get_floor(self):
-        return self.verticies[1] == SCREEN_SIZE - 70
-        
-    def get_mass(self):
-        return self.mass + max(self.fuel, 0)
-    
-    def get_octogon_coords(self):
-        coords = []
-        
-        for coord in self.octogon:
-            coords.append((self.verticies[0] - 50 + self.top_verticies[0] + coord[0], self.verticies[1] - 20 - self.leg_height + self.top_verticies[1] + coord[1]))
-        
-        return coords
-    
-    def get_mph(self):
-        return abs(self.velocity[1] * 2.23694)
-    
-    def get_mph_string(self):
-        return f'{self.get_mph():.2f}'
-        
-    def get_body_y(self):
-        return self.verticies[1] - self.leg_height
                     
 def draw_text(text, color, x = -1, y = -1, width = -1, height = -1, edit_dimensions = False, offset = (0, 0)):
     text_display = font.render(text, True, color)
@@ -231,7 +228,18 @@ while run:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 run = False
-            if (event.key == pygame.K_r):
+            if event.key == pygame.K_SPACE:
+                lander.launch()
+            if (event.key == pygame.K_r and lander.crashed):
+                lander = Lander()
+            if (event.key == pygame.K_l and lander.success):
+                level += 1
+                
+                level_values = levels[level - 1]
+    
+                fuel = level_values[0]
+                max_speed = level_values[1]
+                
                 lander = Lander()
                 
     screen.fill((0, 0, 0))
@@ -240,24 +248,31 @@ while run:
     
     if (pygame.key.get_pressed()[pygame.K_UP]):
         lander.thrust()
-        
-    if (pygame.key.get_pressed()[pygame.K_SPACE]):
-        lander.ascent()
     
     lander.update_velocity()
     
-    draw_text("Fuel: " + str(lander.fuel), (255, 255, 255), offset=(0, 0))
-    draw_text('MPH: ' + lander.get_mph_string(), (255, 0, 0) if lander.get_mph() > max_speed or lander.crashed else (0, 255, 0), offset=(0, -30))
+    draw_text('Level: ' + str(level), (255, 255, 255))
+    draw_text("Fuel: " + str(lander.fuel), (255, 255, 255), offset=(0, -30))
+    draw_text('MPH: ' + lander.get_mph_string(), (255, 0, 0) if lander.get_mph() > max_speed or lander.crashed else (0, 255, 0), offset=(0, -60))
     
     draw_text("Constants", (255, 255, 255), offset=(-SCREEN_SIZE / 1.21, 0))
     draw_text("Burn: 600 kg/s", (255, 255, 255), offset=(-SCREEN_SIZE / 1.3, -30))
     draw_text("Thrust: " + str(thrust) + " N", (255, 255, 255), offset=(-SCREEN_SIZE / 1.35, -60))
 
     if (lander.success):
-        draw_text('Landed', (0, 255, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2, 30, 30, True)
-        draw_text('SPACE to ascent', (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 60, 30, 30, True)
+        draw_text('SUCCESS!!1!!111', (0, 255, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2, 30, 30, True)
+        
+        if level == len(levels):
+            draw_text('you win!!11!11', (0, 255, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 60, 30, 30, True)
+        else:
+            next = levels[level]
+            
+            draw_text('L for next level:', (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 60, 30, 30, True)
+            draw_text('Fuel: ' + str(next[0]), (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 100, 30, 30, True)
+            draw_text('Max MPH: ' + str(next[1]), (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 140, 30, 30, True)
+
     if (lander.crashed):
-        draw_text('Crashed', (255, 0, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2, 30, 30, True)
+        draw_text('FAIL!!1!!111', (255, 0, 0), SCREEN_SIZE / 2, SCREEN_SIZE / 2, 30, 30, True)
         draw_text('R to restart', (255, 255, 255), SCREEN_SIZE / 2, SCREEN_SIZE / 2 + 60, 30, 30, True)
 
     for particle in particles:
